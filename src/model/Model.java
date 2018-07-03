@@ -7,24 +7,17 @@ import java.util.Queue;
 
 import controller.Observer;
 import controller.Subject;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Button;
-import javafx.scene.layout.GridPane;
-import view.AbtractFactory;
-import view.Icon;
 
 public class Model implements IModel, Subject {
 	private List<Observer> listOp = new ArrayList<>();
-	private LabelTimer time;
-	Button[][] cell ;
-	
+
 	CreatMine creatMine;
-	Open open;
+	OpenCell open;
 
 	public Model() {
 		creatMine = new CreatMine(SizeBoard.LVL_EASY);
-		open = new Open(creatMine);
+		open = new OpenCell(creatMine);
 	}
 
 	@Override
@@ -33,7 +26,7 @@ public class Model implements IModel, Subject {
 	}
 
 	@Override
-	public Open getOpen() {
+	public OpenCell getOpen() {
 		return open;
 	}
 
@@ -103,44 +96,12 @@ public class Model implements IModel, Subject {
 	}
 
 	@Override
-	public GridPane createBoarMine() {
-		cell = new Button[getSize()][getSize2()];
-		GridPane boardPane = new GridPane();
-		for (int i = 0; i < cell.length; i++) {
-			for (int j = 0; j < cell[0].length; j++) {
-				cell[i][j] = new Button();
-				cell[i][j].setOnAction(new EventHandler<ActionEvent>() {
-
-					@Override
-					public void handle(ActionEvent arg0) {
-						for (int j2 = 0; j2 < getMine().length; j2++) {
-							for (int j3 = 0; j3 < getMine()[j2].length; j3++) {
-								if (arg0.getSource() == cell[j3][j2]) {
-									notifyy(j2, j3, cell);
-									System.out.println("adas");
-									break;
-								}
-							}
-
-						}
-					}
-
-				});
-				cell[i][j].setPrefSize(65, 65);
-				boardPane.add(cell[i][j], i, j);
-
-			}
-		}
-		return boardPane;
-
-	}
-
-	@Override
 	public void setLevel(SizeBoard sizeBoard) {
 		creatMine = new CreatMine(sizeBoard);
-		open = new Open(creatMine);
+		open = new OpenCell(creatMine);
 
 	}
+
 	@Override
 	public void removeOb(Observer ob) {
 		listOp.remove(ob);
@@ -158,8 +119,9 @@ public class Model implements IModel, Subject {
 			observer.update(i, j, cell);
 		}
 	}
+
 	@Override
-	public void notifyAllCell() {
+	public void notifyAllCell(Button[][] cell) {
 		for (Observer observer : listOp) {
 			observer.update(cell);
 		}

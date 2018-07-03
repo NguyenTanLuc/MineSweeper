@@ -4,26 +4,27 @@ import java.awt.Point;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import model.IModel;
 import model.SizeBoard;
 import view.Board;
-import view.IView;
 
-public class Controller  {
-	IView view;
+public class Controller {
+	Board view;
 	IModel model;
 
-	public Controller(IView view ,IModel iModel) {
-		this.view = (Board) view;
+	public Controller(Board view, IModel iModel) {
+		this.view = view;
 		this.model = iModel;
 		this.model.addOb(view);
 	}
 
 	public void startApp(String[] args) {
-		view.start(args);
+		view.run(args);
 
 	}
 
@@ -39,10 +40,6 @@ public class Controller  {
 		return model.getCheck();
 	}
 
-	public Button[][] getCell() {
-		return view.getCell();
-	}
-
 	public boolean isLose() {
 		return model.isLose();
 	}
@@ -50,17 +47,14 @@ public class Controller  {
 	public boolean isWin() {
 		return model.isWin();
 	}
-	public GridPane createBoardMine() {
-		return model.createBoarMine();
-	}
-	public void setLevel (SizeBoard sizeBoard) {
+
+	public void setLevel(SizeBoard sizeBoard) {
 		model.setLevel(sizeBoard);
-		
+
 	}
-	
 
 	public void openCell(int i, int j) {
-		if(!(model.isLose() || model.isWin())){
+		if (!(model.isLose() || model.isWin())) {
 			Queue<Point> listzero = new LinkedList<>();
 			model.openCell(j, i, listzero);
 			model.spreadCell(model, listzero);
@@ -70,16 +64,47 @@ public class Controller  {
 		}
 		model.check(i, j);
 	}
+
+	Button[][] cell;
+
 	public void notifyAllCell() {
-		model.notifyAllCell();
+		model.notifyAllCell(cell);
 	}
 
-//	@Override
-//	public void update(int i, int j) {
-//		setActionButton(i, j);
-//		model.check(i, j);
-//		System.out.println(model.isLose());
-//		System.out.println(model.isWin());
-//	}
+	public GridPane createBoarMine() {
+		cell = new Button[model.getSize()][model.getSize2()];
+		GridPane boardPane = new GridPane();
+		for (int i = 0; i < cell.length; i++) {
+			for (int j = 0; j < cell[0].length; j++) {
+				cell[i][j] = new Button();
+				cell[i][j].setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+					@Override
+					public void handle(MouseEvent event) {
+						for (int j2 = 0; j2 < getMine().length; j2++) {
+							for (int j3 = 0; j3 < getMine()[j2].length; j3++) {
+								if (event.getSource() == cell[j3][j2]) {
+									if (event.getButton().equals(MouseButton.PRIMARY)) {
+										model.notifyy(j2, j3, cell);
+									}
+									if (event.getButton().equals(MouseButton.SECONDARY)) {
+										view.setRightClick(j2, j3, cell);
+										break;
+									}
+								}
+
+							}
+						}
+					}
+
+				});
+				cell[i][j].setPrefSize(65, 65);
+				boardPane.add(cell[i][j], i, j);
+
+			}
+		}
+		return boardPane;
+
+	}
 
 }

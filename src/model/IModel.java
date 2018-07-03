@@ -4,10 +4,11 @@ import java.awt.Point;
 import java.util.Queue;
 
 import controller.Observer;
+import controller.Subject;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
 
-public interface IModel {
+public interface IModel  {
 	int[][] getMine();
 
 	boolean[][] getCheck();
@@ -27,14 +28,15 @@ public interface IModel {
 
 	CreatMine getCreatMine();
 
-	Open getOpen();
+	OpenCell getOpen();
 
 	void setLevel(SizeBoard sizeBoard);
 
 	void notifyy(int i, int j, Button[][] cell);
 
-	GridPane createBoarMine();
+//	GridPane createBoarMine();
 
-	void notifyAllCell();
+
+	void notifyAllCell(Button[][] cell);
 
 }

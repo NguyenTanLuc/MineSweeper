@@ -1,8 +1,10 @@
 package view;
 
 import controller.Controller;
+import controller.Observer;
 import extension.Ultis;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -20,23 +22,23 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import model.LabelTimer;
 import model.Model;
+import model.SetTextTime;
 import model.SizeBoard;
 
-public class Board extends Application implements IView, EventHandler<ActionEvent> {
-	private Icon iconStart;
+public class Board extends Application implements Observer, EventHandler<ActionEvent> {
+	private AbtractFactory factory;
 	private int countClick = 0;
-	int totalMinne = 20;
 	private Controller controller;
 	private BorderPane boder;
 	private Text timer;
 	private GridPane boardPane;
 	private BorderPane pane;
-	private LabelTimer time;
+	private SetTextTime time;
 	public static int level = 1;
 	private MenuItem easy;
 	private MenuItem changDisplay;
+	private MenuItem listPlayerWin;
 	private MenuItem menu;
 	private MenuItem normal;
 	private MenuItem hard;
@@ -50,14 +52,14 @@ public class Board extends Application implements IView, EventHandler<ActionEven
 		boder = new BorderPane();
 		timer = new Text();
 		timer.setId("timer");
-		time = new LabelTimer(timer);
+		time = new SetTextTime(timer);
+		factory = new AbtractFactory(new FactoryMethodDialog(), new FactoryMethodIcon());
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		panelbig = new BorderPane();
 		panelbig.setId("panelbig");
-		iconStart = AbtractFactory.createIcon(theme);
 		pane = new BorderPane();
 		pane.setId("pane");
 
@@ -65,15 +67,12 @@ public class Board extends Application implements IView, EventHandler<ActionEven
 		panelMatCuoi.setId("panelMatCuoi");
 		btnNewGame = new Button();
 		btnNewGame.setPrefSize(45, 45);
-		// ButNewGame.setGraphic(new ImageView(iconNew));
 		panelMatCuoi.setRight(timer);
-		// panelMatCuoi.setto
 		panelMatCuoi.setCenter(btnNewGame);
 
 		btnNewGame.setOnAction(this);
 		btnNewGame.setId("btnNewGame");
 
-		// pane.setTop(panelMatCuoi);
 
 		pane.setTop(time);
 		MenuBar menuBar = new MenuBar();
@@ -84,45 +83,44 @@ public class Board extends Application implements IView, EventHandler<ActionEven
 
 		easy = new MenuItem("Easy");
 		changDisplay = new MenuItem("Change Display");
-		menu = new MenuItem("Menu and Quit Game");
+		menu = new MenuItem("Quit Game");
+		listPlayerWin = new MenuItem("Player Win");
 		normal = new MenuItem("Normal");
 		hard = new MenuItem("Hard");
 		about = new MenuItem("About");
+
 		about.setOnAction(this);
 		easy.setOnAction(this);
 		normal.setOnAction(this);
 		hard.setOnAction(this);
 		changDisplay.setOnAction(this);
-		game.getItems().add(changDisplay);
-		game.getItems().add(menu);
+		menu.setOnAction(this);
+		listPlayerWin.setOnAction(this);
+
+		game.getItems().addAll(changDisplay, listPlayerWin, menu);
 		levl.getItems().addAll(easy, normal, hard);
 		help.getItems().add(about);
-
 		menuBar.getMenus().addAll(game, levl, help);
-		boardPane = controller.createBoardMine();
+
+		boardPane = controller.createBoarMine();
 		boardPane.setId("boardPane");
 		panelbig.setTop(panelMatCuoi);
 		panelbig.setCenter(boardPane);
 		boder.setTop(menuBar);
 		boder.setCenter(panelbig);
-		// boder.setRight(panelMatCuoi);
 		Scene seen = new Scene(boder, 700, 700);
 		seen.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+		primaryStage.setTitle("Mine Sweeper");
 		primaryStage.setScene(seen);
 		primaryStage.show();
 
 	}
 
-	@Override
-	public void start(String[] args) {
+	public void run(String[] args) {
 		launch();
 
 	}
 
-	@Override
-	public Button[][] getCell() {
-		return null;
-	}
 
 	@Override
 	public void update(int k, int l, Button[][] cell) {
@@ -149,18 +147,19 @@ public class Board extends Application implements IView, EventHandler<ActionEven
 
 		}
 		if (about == event.getSource()) {
-			AbtractFactory.creatDiaLog(Ultis.DIALOG_ABOUT);
+			factory.creatDiaLog(Ultis.DIALOG_ABOUT);
 		}
 		if (changDisplay == event.getSource()) {
 			if (countClick % 2 == 0) {
-				iconStart = AbtractFactory.createIcon(Ultis.DISPLAY_BEAUTIFUL);
 				theme = Ultis.DISPLAY_BEAUTIFUL;
 			} else {
-				iconStart = AbtractFactory.createIcon(Ultis.DISPLAY_CLASSIC);
 				theme = Ultis.DISPLAY_CLASSIC;
 			}
 			countClick++;
 			controller.notifyAllCell();
+		}
+		if (menu == event.getSource()) {
+			Platform.exit();
 		}
 		if (btnNewGame == event.getSource()) {
 			SizeBoard sizeBoard = null;
@@ -173,6 +172,9 @@ public class Board extends Application implements IView, EventHandler<ActionEven
 			}
 			resetGame(sizeBoard);
 		}
+		if (listPlayerWin == event.getSource()) {
+			factory.creatDiaLog("PlayWin");
+		}
 
 	}
 
@@ -183,9 +185,9 @@ public class Board extends Application implements IView, EventHandler<ActionEven
 
 	public void resetGame(SizeBoard sizeBoard) {
 		controller.setLevel(sizeBoard);
-		iconStart = AbtractFactory.createIcon(theme);
-		time.setStop(false);
-		boardPane = controller.createBoardMine();
+		time.setStop(true);
+		time.resettime();
+		boardPane = controller.createBoarMine();
 		boardPane.setId("boardPane");
 		panelbig.setCenter(boardPane);
 	}
@@ -196,61 +198,70 @@ public class Board extends Application implements IView, EventHandler<ActionEven
 				if (controller.getOpen()[j][i] == true) {
 					if (controller.getMine()[j][i] == -1) {
 
-						cell[j][i].setGraphic(new ImageView(iconStart.getMine()));
+						cell[j][i].setGraphic(new ImageView(factory.createIcon(theme).getMine()));
 						if (controller.isLose()) {
-							// time.setStop(false);
-							AbtractFactory.creatDiaLog("DialogLose");
+							time.setStop(false);
 							boardPane.setDisable(true);
+							factory.creatDiaLog("DialogLose");
 
 						}
 					} else {
 						if (controller.getMine()[j][i] == 1) {
-							cell[j][i].setGraphic(new ImageView(iconStart.getNumber1()));
+							cell[j][i].setGraphic(new ImageView(factory.createIcon(theme).getNumber1()));
 							cell[j][i].setBackground(
 									new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
 						}
 						if (controller.getMine()[j][i] == 2) {
-							cell[j][i].setGraphic(new ImageView(iconStart.getNumber2()));
+							cell[j][i].setGraphic(new ImageView(factory.createIcon(theme).getNumber2()));
 							cell[j][i].setBackground(
 									new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
 						}
 						if (controller.getMine()[j][i] == 3) {
-							cell[j][i].setGraphic(new ImageView(iconStart.getNumber3()));
+							cell[j][i].setGraphic(new ImageView(factory.createIcon(theme).getNumber3()));
 							cell[j][i].setBackground(
 									new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
 						}
 						if (controller.getMine()[j][i] == 4) {
-							cell[j][i].setGraphic(new ImageView(iconStart.getNumber4()));
+							cell[j][i].setGraphic(new ImageView(factory.createIcon(theme).getNumber4()));
 							cell[j][i].setBackground(
 									new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
 						}
 						if (controller.getMine()[j][i] == 5) {
-							cell[j][i].setGraphic(new ImageView(iconStart.getNumber5()));
+							cell[j][i].setGraphic(new ImageView(factory.createIcon(theme).getNumber5()));
 						}
 						if (controller.getMine()[j][i] == 6) {
-							cell[j][i].setGraphic(new ImageView(iconStart.getNumber6()));
+							cell[j][i].setGraphic(new ImageView(factory.createIcon(theme).getNumber6()));
 							cell[j][i].setBackground(
 									new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
 						}
 						if (controller.getMine()[j][i] == 0) {
-							cell[j][i].setGraphic(new ImageView(iconStart.getNumber0()));
+							cell[j][i].setGraphic(new ImageView(factory.createIcon(theme).getNumber0()));
 							cell[j][i].setBackground(
 									new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
 						}
-						// cell[j][i].setText(getMine()[j][i] + "");
 						if (controller.isWin()) {
-							AbtractFactory.creatDiaLog("DialogWin");
+							time.setStop(false);
+							factory.creatDiaLog("DialogWin");
+
 						}
 					}
 				}
 			}
 		}
+	}
+
+	public void setRightClick(int i, int j, Button[][] cell) {
+		if (controller.getOpen()[j][i] == false) {
+			cell[j][i].setGraphic(new ImageView(factory.createIcon(theme).getFlag()));
+
+		}
+
 	}
 
 }

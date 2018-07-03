@@ -2,34 +2,21 @@ package view;
 
 public class AbtractFactory {
 
-	public AbtractFactory() {
+	private FactoryMethodDialog dialog;
+	private FactoryMethodIcon icon;
+
+	public AbtractFactory(FactoryMethodDialog dialog, FactoryMethodIcon icon) {
+		this.dialog = dialog;
+		this.icon = icon;
 	}
 
-	public static Icon createIcon(String titel) {
-		if (titel.equals("DisplayClassic")) {
-			return new IconDisplay1();
-		} else {
-			return new IconDisplay2();
-		}
+	public Icon createIcon(String titel) {
+		return icon.createIcon(titel);
+
 	}
 
-	public static Dialog creatDiaLog(String tyle) {
-		if (tyle.equals("DialogWin")) {
-			return new DialogWin();
-
-		}
-		if (tyle.equals("DialogLose")) {
-			return new DialogLose();
-
-		}
-		if (tyle.equals("DialogAbout")) {
-			return new DialogAbout();
-		}
-		if (tyle.equals("ChangDisPlay")) {
-			return new DialogChangeDisplay();
-
-		}
-		return null;
+	public Dialog creatDiaLog(String tyle) {
+		return dialog.creatDiaLog(tyle);
 
 	}
 

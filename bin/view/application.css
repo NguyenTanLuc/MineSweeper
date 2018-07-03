@@ -4,7 +4,6 @@
 }
 .button{
     -fx-border-color: rgb(5.0,82.0,3.0);
-    /*-fx-background-radius: 0.0;*/
     -fx-background-color: #FFFFFF;  /*#57a303; */
     -fx-border-style: solid ;
     -fx-border-width: 0.5px;
@@ -13,23 +12,14 @@
     -fx-background-size: contain ;
 }
 #btnNewGame{
-	-fx-background-image: url(/icon1/Mine.png);
+	-fx-background-image: url(/icon2/matcuoi.jpg);
 	-fx-background-size: contain ;
 }
 #btnNewGame:hover{
-	-fx-background-image: url(/icon1/00.png);
+	-fx-background-image: url(/icon2/cricle.png);
 	-fx-background-size: contain ;
 }
-#panelbig{
-	-fx-background-color: #57a303;
-	-fx-horizontal-grid-lines-visible: true;
-	-fx-vertical-grid-lines-visible: true;
-	-fx-horizontal-zero-line-visible: true;
-	-fx-vertical-zero-line-visible: true;
-	-fx-alignment:center;
-	-fx-page-information-alignment: left ;
-	-fx-padding: 10.0pt ;
-}
+
 #panelMatCuoi{
 	-fx-hgap: 10.0px ;
 	-fx-padding: 10px;

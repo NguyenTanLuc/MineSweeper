@@ -1,16 +1,20 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Player {
 	private String name;
-	private long score;
-	public Player(String name, long score) {
+	private String score;
+	public static List<Player> list = new ArrayList<>();
+	public Player(String name, String string) {
 		this.name = name;
-		this.score = score;
+		this.score = string;
 	}
 	public String getName() {
 		return name;
 	}
-	public long getScore() {
+	public String getScore() {
 		return score;
 	}
 	

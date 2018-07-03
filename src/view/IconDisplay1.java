@@ -86,4 +86,12 @@ public class IconDisplay1 implements Icon {
 		return i;
 	}
 
+	@Override
+	public Image getFlag() {
+		InputStream iconNewg = this.getClass().getResourceAsStream(link + "/Flag.png");
+		Image i = new Image(iconNewg, x, y, false, false);
+
+		return i;
+	}
+
 }

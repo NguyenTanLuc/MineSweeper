@@ -11,6 +11,7 @@ public interface Icon {
 	Image getNumber5();
 	Image getNumber6();
 	Image getMine();
+	Image getFlag();
 	
 
 }
